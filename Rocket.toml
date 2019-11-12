@@ -1,3 +1,4 @@
 [global.databases]
-census_geoms  = {url = "../ny_blocks.mbtiles"}
+census_block_groups= {url = "../../block_groups.mbtile"}
+census_tracts= {url = "../../tracts.mbtile"}
 

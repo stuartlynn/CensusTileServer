@@ -39,7 +39,16 @@
         'census_tracts',
         {
           type: 'vector',
-          tiles: ["http://localhost:8000/test_tile/{z}/{x}/{y}"],
+          tiles: ["http://localhost:8000/tracts/{z}/{x}/{y}"],
+          minzoom: 0,
+          maxzoom: 14
+        }
+      )
+      map.addSource(
+        'block_groups',
+        {
+          type: 'vector',
+          tiles: ["http://localhost:8000/block_groups/{z}/{x}/{y}"],
           minzoom: 0,
           maxzoom: 14
         }
@@ -50,22 +59,46 @@
           id: "census_tract_poly",
           type: "fill",
           source: 'census_tracts',
-          "source-layer": "2010CensusBlocks",
+          "source-layer": "tracts",
           "paint": {
             "fill-opacity": 1.0,
             "fill-color": "#ff69b4",
           }
         }, 'waterway-label');
-      map.addLayer(
+/*      map.addLayer(
         {
           id: "census_tract_line",
           type: "line",
           source: 'census_tracts',
-          "source-layer": "2010CensusBlocks",
+          "source-layer": "tracts",
           "paint": {
             "line-width": 1.0,
             "line-opacity": 1.0,
             "line-color": "#FF0000",
+          }
+        }, 'waterway-label');
+
+      map.addLayer(
+        {
+          id: "block_groups_poly",
+          type: "fill",
+          source: 'block_groups',
+          "source-layer": "block_groups",
+          "paint": {
+            "fill-opacity": 1.0,
+            "fill-color": "#00FFb4",
+          }
+        }, 'waterway-label'); */
+      map.addLayer(
+        {
+          id: "block_groups_line",
+          type: "line",
+          source: 'block_groups',
+          "source-layer": "block_groups",
+          "paint": {
+            "line-width": 1.0,
+            "line-opacity": 1.0,
+            "line-color": "#00FF00",
           }
         }, 'waterway-label');
     })

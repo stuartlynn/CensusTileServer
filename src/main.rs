@@ -13,8 +13,11 @@ use rocket_contrib::serve::StaticFiles;
 
 use rocket::http::Header;
 
-#[database("census_geoms")]
-struct CensusGeomsDbConn(diesel::SqliteConnection);
+
+#[database("census_tracts")]
+struct CensusTractsGeomsDbConn(diesel::SqliteConnection);
+#[database("census_block_groups")]
+struct CensusBlockGroupsGeomsDbConn(diesel::SqliteConnection);
 
 
 #[get("/hello/<name>/<age>")]
@@ -47,8 +50,24 @@ struct Tile{
 }
 
 
-#[get("/test_tile/<z>/<x>/<y>")]
-fn test_tile(conn: CensusGeomsDbConn, z: u32, x: u32, y: u32)->TileResponder{
+#[get("/tracts/<z>/<x>/<y>")]
+fn tract_tiles(conn: CensusTractsGeomsDbConn, z: u32, x: u32, y: u32)->TileResponder{
+    let y = (1 << z) - 1 - y;
+    let query = format!(
+"select tile_data from tiles where zoom_level = {} and tile_column = {} and tile_row = {}"
+        ,z,x,y);
+    println!("{}",query);
+
+    let result: Tile  = sql_query(query).get_result(&*conn).expect("query failed to run");
+
+    TileResponder{
+        inner:result.tile_data,
+        header: ContentEncodingHeader{encoding:String::from("gzip")}
+    }
+}
+
+#[get("/block_groups/<z>/<x>/<y>")]
+fn block_group_tiles(conn: CensusBlockGroupsGeomsDbConn, z: u32, x: u32, y: u32)->TileResponder{
     let y = (1 << z) - 1 - y;
     let query = format!(
 "select tile_data from tiles where zoom_level = {} and tile_column = {} and tile_row = {}"
@@ -65,7 +84,8 @@ fn test_tile(conn: CensusGeomsDbConn, z: u32, x: u32, y: u32)->TileResponder{
 
 fn main() {
     rocket::ignite()
-        .attach(CensusGeomsDbConn::fairing())
-        .mount("/", routes![hello,test_tile])
+        .attach(CensusTractsGeomsDbConn::fairing())
+        .attach(CensusBlockGroupsGeomsDbConn::fairing())
+        .mount("/", routes![hello,tract_tiles,block_group_tiles])
         .mount("/", StaticFiles::from("./public")).launch();
 }
